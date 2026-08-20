@@ -1,0 +1,178 @@
+openapi: 3.0.3
+info:
+  title: Phonebook API
+  description: Search service backed by a hardcoded phonebook directory.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Check service health
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ok
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /users/search:
+    post:
+      summary: Search phonebook users
+      description: >
+        Returns every user matching all supplied fields. Matching is
+        case-insensitive and partial. An empty object returns all users.
+      operationId: searchUsers
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSearchCriteria'
+            examples:
+              byTeamAndName:
+                summary: Search by team and first name
+                value:
+                  team: engineering
+                  firstName: pi
+              allUsers:
+                summary: Return all users
+                value: {}
+      responses:
+        '200':
+          description: Matching phonebook users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid JSON, non-object payload, or unknown search field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                unknownField:
+                  value:
+                    error: Unknown search field(s)
+                    fields:
+                      - department
+                    allowedFields:
+                      - lastName
+                      - firstName
+                      - team
+                      - landlineNumber
+                      - mobileNumber
+                      - internalExtension
+                invalidJson:
+                  value:
+                    error: Request body must be valid JSON
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    NotFound:
+      description: Route not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Route not found
+    InternalServerError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Internal server error
+  schemas:
+    User:
+      type: object
+      required:
+        - lastName
+        - firstName
+        - team
+        - landlineNumber
+        - mobileNumber
+        - internalExtension
+      properties:
+        lastName:
+          type: string
+          example: Kowalski
+        firstName:
+          type: string
+          example: Jan
+        team:
+          type: string
+          example: Sales
+        landlineNumber:
+          type: string
+          example: '+48 22 100 10 10'
+        mobileNumber:
+          type: string
+          example: '+48 600 100 100'
+        internalExtension:
+          type: string
+          example: '101'
+    UserSearchCriteria:
+      type: object
+      additionalProperties: false
+      properties:
+        lastName:
+          type: string
+          description: Case-insensitive partial match.
+        firstName:
+          type: string
+          description: Case-insensitive partial match.
+        team:
+          type: string
+          description: Case-insensitive partial match.
+        landlineNumber:
+          type: string
+          description: Case-insensitive partial match.
+        mobileNumber:
+          type: string
+          description: Case-insensitive partial match.
+        internalExtension:
+          type: string
+          description: Case-insensitive partial match.
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          example: ok
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            fields:
+              type: array
+              items:
+                type: string
+            allowedFields:
+              type: array
+              items:
+                type: string

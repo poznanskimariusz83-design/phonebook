@@ -24,6 +24,8 @@ Supported fields are `lastName`, `firstName`, `team`, `landlineNumber`, `mobileN
 
 The response is a JSON array of matching records. Invalid JSON, unsupported fields, and non-object payloads return `400`. `GET /health` returns `{ "status": "ok" }`.
 
+The complete OpenAPI 3 specification is available in [openapi.yaml](openapi.yaml).
+
 ## Test
 
 ```sh
