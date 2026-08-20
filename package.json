@@ -1,0 +1,14 @@
+{
+  "name": "phonebook-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A small phonebook search API with hardcoded users",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
